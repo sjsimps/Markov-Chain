@@ -6,6 +6,7 @@
 
 static std::string file = "test.txt";
 static Markov_Chain* chain;
+static int out_size = 25;
 
 static void set_config(int argc, char* argv[])
 {
@@ -13,16 +14,20 @@ static void set_config(int argc, char* argv[])
     static struct option options[] =
     {
         {"file",       required_argument, 0, 'f'},
+        {"size",       required_argument, 0, 's'},
         {"all",        no_argument, 0, 'a'},
         {"help",       no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
 
-    while ((option_index = getopt_long(argc, argv, "ahf:", options, NULL)) != -1)
+    while ((option_index = getopt_long(argc, argv, "ahf:s:", options, NULL)) != -1)
     {
         switch (option_index){
             case 'f':
                 file = optarg;
+                break;
+            case 's':
+                out_size = strtoul(optarg, NULL, 10);
                 break;
             case 'a':
                 chain->m_cfg.accept_all = true;
@@ -52,7 +57,7 @@ int main (int argc, char* argv[])
 
     chain->Parse_File(file, &chain->m_data);
     chain->Build_Chain();
-    chain->Output_Chain(1,25);
+    chain->Output_Chain(1,out_size);
 
     delete chain;
 }
