@@ -12,14 +12,23 @@ static void set_config(int argc, char* argv[])
     static struct option options[] =
     {
         {"file",       required_argument, 0, 'f'},
+        {"help",       no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
 
-    while ((option_index = getopt_long(argc, argv, "f:", options, NULL)) != -1)
+    while ((option_index = getopt_long(argc, argv, "hf:", options, NULL)) != -1)
     {
         switch (option_index){
             case 'f':
                 file = optarg;
+                break;
+            case 'h':
+                std::cout << "\nUsage: markov [fh]"
+                          << "\n"
+                          << "\n\t[-f | --file] <filename>  Generate chain from file"
+                          << "\n\t[-h | --help]             Display help and exit."
+                          << "\n\n";
+                exit(EXIT_SUCCESS);
                 break;
             default:
                 std::cout<< "\nInvalid option. Program exiting.\n";
