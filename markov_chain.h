@@ -22,6 +22,7 @@ public:
 
     struct Markov_Cfg
     {
+        bool accept_all;
         bool parse_by_line;
         int state_length;
     } m_cfg;

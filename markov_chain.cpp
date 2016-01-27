@@ -19,12 +19,15 @@ void Markov_Chain::Initialize_Cfg()
 {
     m_cfg.parse_by_line = false;
     m_cfg.state_length = 1;
+    m_cfg.accept_all = true;
 }
 
 bool Markov_Chain::Is_Valid_Word(std::string word)
 {
+    bool retval = m_cfg.accept_all;
     std::regex match_word ("[a-zA-Z,\\.]*", std::regex_constants::basic);
-    return std::regex_match(word, match_word);
+    retval = retval || std::regex_match(word, match_word);
+    return retval;
 }
 
 static void Print_String_Vector(std::vector<std::string> arr)
