@@ -15,7 +15,7 @@ static void set_config(int argc, char* argv[])
         {0, 0, 0, 0}
     };
 
-    while ((option_index = getopt_long(argc, argv, "rgbf:t:e:", options, NULL)) != -1)
+    while ((option_index = getopt_long(argc, argv, "f:", options, NULL)) != -1)
     {
         switch (option_index){
             case 'f':
