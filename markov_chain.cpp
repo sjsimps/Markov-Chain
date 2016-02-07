@@ -17,7 +17,6 @@ Markov_Chain::~Markov_Chain()
 
 void Markov_Chain::Initialize_Cfg()
 {
-    m_cfg.parse_by_line = false;
     m_cfg.state_length = 1;
     m_cfg.accept_all = false;
     m_cfg.split_lines = false;
@@ -144,7 +143,7 @@ void Markov_Chain::Build_Chain()
     }
 }
 
-void Markov_Chain::Output_Chain (int fd, int output_size)
+void Markov_Chain::Output_Chain (int output_size)
 {
     srand (time(NULL));
 

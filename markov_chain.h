@@ -18,12 +18,11 @@ public:
 
     void Parse_File(std::string filename, std::vector<std::string>* words);
     void Build_Chain();
-    void Output_Chain (int fd, int output_size);
+    void Output_Chain (int output_size);
 
     struct Markov_Cfg
     {
         bool accept_all;
-        bool parse_by_line;
         bool split_lines;
         int state_length;
     } m_cfg;

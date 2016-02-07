@@ -64,7 +64,7 @@ int main (int argc, char* argv[])
 
     chain->Parse_File(file, &chain->m_data);
     chain->Build_Chain();
-    chain->Output_Chain(1,out_size);
+    chain->Output_Chain(out_size);
 
     delete chain;
 }
