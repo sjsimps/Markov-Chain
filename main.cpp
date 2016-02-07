@@ -16,11 +16,12 @@ static void set_config(int argc, char* argv[])
         {"file",       required_argument, 0, 'f'},
         {"size",       required_argument, 0, 's'},
         {"all",        no_argument, 0, 'a'},
+        {"line",      no_argument, 0, 'l'},
         {"help",       no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
 
-    while ((option_index = getopt_long(argc, argv, "ahf:s:", options, NULL)) != -1)
+    while ((option_index = getopt_long(argc, argv, "alhf:s:", options, NULL)) != -1)
     {
         switch (option_index){
             case 'f':
@@ -32,11 +33,17 @@ static void set_config(int argc, char* argv[])
             case 'a':
                 chain->m_cfg.accept_all = true;
                 break;
+            case 'l':
+                chain->m_cfg.split_lines = true;
+                break;
             case 'h':
-                std::cout << "\nUsage: markov [fh]"
+                std::cout << "\nUsage: markov [options]"
+                          << "\nGenerates Markov chain from text input and generates new text sequence."
                           << "\n"
                           << "\n\t[-f | --file] <filename>  Generate chain from file"
-                          << "\n\t[-a | --all]              Utilize all input without filter."
+                          << "\n\t[-s | --size] <size>      Set number of words generated"
+                          << "\n\t[-a | --all ]             Utilize all input without filter."
+                          << "\n\t[-l | --line]             Use newlines as chain entries."
                           << "\n\t[-h | --help]             Display help and exit."
                           << "\n\n";
                 exit(EXIT_SUCCESS);

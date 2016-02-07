@@ -24,6 +24,7 @@ public:
     {
         bool accept_all;
         bool parse_by_line;
+        bool split_lines;
         int state_length;
     } m_cfg;
 

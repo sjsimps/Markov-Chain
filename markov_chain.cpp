@@ -19,7 +19,8 @@ void Markov_Chain::Initialize_Cfg()
 {
     m_cfg.parse_by_line = false;
     m_cfg.state_length = 1;
-    m_cfg.accept_all = true;
+    m_cfg.accept_all = false;
+    m_cfg.split_lines = false;
 }
 
 bool Markov_Chain::Is_Valid_Word(std::string word)
@@ -55,6 +56,7 @@ void Markov_Chain::Parse_File(std::string filename, std::vector<std::string>* wo
         while ( getline (file,line) )
         {
             line_length = line.length();
+            position = 0;
             for (int i = 0; i < line_length; i++)
             {
                 is_end = (i == line_length - 1) ? 1 : 0;
@@ -70,6 +72,7 @@ void Markov_Chain::Parse_File(std::string filename, std::vector<std::string>* wo
                     }
                 }
             }
+            if (m_cfg.split_lines) words->push_back("\n");
         }
         file.close();
     }
