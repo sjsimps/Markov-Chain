@@ -16,7 +16,7 @@ public:
     Markov_Chain();
     ~Markov_Chain();
 
-    void Parse_File(std::string filename, std::vector<std::string>* words);
+    void Parse_File(std::string filename);
     void Build_Chain();
     void Output_Chain (int output_size);
 
@@ -24,6 +24,7 @@ public:
     {
         bool accept_all;
         bool split_lines;
+        bool use_csv;
         int state_length;
     } m_cfg;
 
@@ -32,6 +33,7 @@ public:
 
 private:
     bool Is_Valid_Word(std::string word);
+    void Add_line_to_chain(std::string line);
     void Initialize_Cfg();
 };
 

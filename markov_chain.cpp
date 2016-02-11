@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "markov_chain.h"
+#include "csv_parser.h"
 
 Markov_Chain::Markov_Chain()
 {
@@ -20,16 +21,18 @@ void Markov_Chain::Initialize_Cfg()
     m_cfg.state_length = 1;
     m_cfg.accept_all = false;
     m_cfg.split_lines = false;
+    m_cfg.use_csv = false;
 }
 
 bool Markov_Chain::Is_Valid_Word(std::string word)
 {
     bool retval = m_cfg.accept_all;
-    std::regex match_word ("[a-zA-Z,\\.]*", std::regex_constants::basic);
+    std::regex match_word ("[a-zA-Z,\\.\\\"\\']*", std::regex_constants::basic);
     retval = retval || std::regex_match(word, match_word);
     return retval;
 }
 
+#ifdef DEBUG
 static void Print_String_Vector(std::vector<std::string> arr)
 {
     const int size = arr.size();
@@ -39,49 +42,46 @@ static void Print_String_Vector(std::vector<std::string> arr)
     }
     std::cout << "\n";
 }
+#endif
 
-void Markov_Chain::Parse_File(std::string filename, std::vector<std::string>* words)
+void Markov_Chain::Parse_File(std::string filename)
 {
     std::ifstream file;
     std::string line;
-    std::string word;
-    int position = 0;
-    int is_end;
-    int line_length;
+
 
     file.open(filename);
-    if (file.is_open())
+    if (! m_cfg.use_csv)
     {
-        while ( getline (file,line) )
+        if (file.is_open())
         {
-            line_length = line.length();
-            position = 0;
-            for (int i = 0; i < line_length; i++)
+            while ( getline (file,line) )
             {
-                is_end = (i == line_length - 1) ? 1 : 0;
-                
-                if (line[i] == ' ' || is_end)
-                {
-                    word = line.substr(position, i - position + is_end);
-                    position = (++i) % line_length;
-                    
-                    if (Is_Valid_Word(word))
-                    {
-                        words->push_back(word);
-                    }
-                }
+                Add_line_to_chain(line);
             }
-            if (m_cfg.split_lines) words->push_back("\n");
+            file.close();
         }
-        file.close();
+        else
+        {
+            std::cout << "File \"" << filename << "\" could not be opened!";
+            exit(EXIT_FAILURE);
+        }
     }
-    else
+    else //Parse input as CSV
     {
-        std::cout << "File \"" << filename << "\" could not be opened!";
-        exit(EXIT_FAILURE);
+        CSV_Parser* csv = new CSV_Parser();
+        csv->Set_Data(filename);
+        for (int i = 0; i < csv->m_size; i++)
+        {
+            line = csv->Get_Entry(i);
+            Add_line_to_chain(line);
+        }
+        delete csv;
     }
 
+    #ifdef DEBUG
     Print_String_Vector(*words);
+    #endif
 }
 
 void Markov_Chain::Build_Chain()
@@ -143,6 +143,31 @@ void Markov_Chain::Build_Chain()
     }
 }
 
+void Markov_Chain::Add_line_to_chain(std::string line)
+{
+    int position = 0;
+    int is_end;
+    std::string word;
+    int line_length = line.length();
+
+    for (int i = 0; i < line_length; i++)
+    {
+        is_end = (i == line_length - 1) ? 1 : 0;
+        
+        if (line[i] == ' ' || is_end)
+        {
+            word = line.substr(position, i - position + is_end);
+            position = (++i) % line_length;
+            
+            if (Is_Valid_Word(word))
+            {
+                m_data.push_back(word);
+            }
+        }
+    }
+    if (m_cfg.split_lines) m_data.push_back("\n");
+}
+
 void Markov_Chain::Output_Chain (int output_size)
 {
     srand (time(NULL));
@@ -151,7 +176,6 @@ void Markov_Chain::Output_Chain (int output_size)
     int val = rand() % m_data.size();
     State state = m_map[m_data[val]];
     Edge* edge = state.edge_list;
-
 
     std::cout << "\nOUTPUT:\n" ;
     while (count < output_size && edge != NULL)
