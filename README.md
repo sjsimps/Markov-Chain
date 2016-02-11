@@ -1,6 +1,6 @@
 #Markov Chain Generator
 
-Generatoes Markov chain from text input and outputs randomized text sequence.
+Generates Markov chain from text input and outputs randomized text sequence.
 
 Usage:
 
