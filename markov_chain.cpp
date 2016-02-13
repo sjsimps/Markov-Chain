@@ -79,9 +79,6 @@ void Markov_Chain::Parse_File(std::string filename)
         delete csv;
     }
 
-    #ifdef DEBUG
-    Print_String_Vector(*words);
-    #endif
 }
 
 void Markov_Chain::Build_Chain()
