@@ -18,10 +18,11 @@ Markov_Chain::~Markov_Chain()
 
 void Markov_Chain::Initialize_Cfg()
 {
-    m_cfg.state_length = 1;
     m_cfg.accept_all = false;
     m_cfg.split_lines = false;
     m_cfg.use_csv = false;
+    m_cfg.csv_column = 0;
+    m_cfg.csv_n_columns = 0;
 }
 
 bool Markov_Chain::Is_Valid_Word(std::string word)
@@ -70,7 +71,7 @@ void Markov_Chain::Parse_File(std::string filename)
     else //Parse input as CSV
     {
         CSV_Parser* csv = new CSV_Parser();
-        csv->Set_Data(filename);
+        csv->Set_Data(filename, m_cfg.csv_column, m_cfg.csv_n_columns);
         for (int i = 0; i < csv->m_size; i++)
         {
             line = csv->Get_Entry(i);

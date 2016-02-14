@@ -13,7 +13,11 @@ std::string CSV_Parser::Get_Entry(int i)
     return m_data[i];
 }
 
-void CSV_Parser::Set_Data(std::string filename)
+//Sets CSV data.
+//Use column to select which CSV column is stored in data
+//Set n_columns to select the number of data entries per row
+//Setting column to zero parses all CSV data
+void CSV_Parser::Set_Data(std::string filename, int column, int n_columns)
 {
     bool in_paren = false;
     int end_of_line = false;
@@ -21,11 +25,12 @@ void CSV_Parser::Set_Data(std::string filename)
     std::ifstream file;
     std::string line;
     std::string entry;
+    int entry_count = 0;
     int position = 0;
     int line_length;
 
     m_data.clear();
-    
+
     file.open(filename);
     if (file.is_open())
     {
@@ -37,15 +42,19 @@ void CSV_Parser::Set_Data(std::string filename)
             {
                 end_of_line = ((i+1) >= line_length) ? 1 : 0;
 
-                if (line[i] == ',' || end_of_line)
+                if (line[i] == ',' || line[i] == 0xA || end_of_line)
                 {
                     if(!in_paren)
                     {
-                        entry.append( line.substr(position, i - position + end_of_line) );
-                        Handle_Quotes(&entry);
-                        m_data.push_back(entry);
+                        if ((column == 0) || (entry_count % n_columns)+1 == column)
+                        {
+                            entry.append( line.substr(position, i - position + end_of_line) );
+                            Handle_Quotes(&entry);
+                            m_data.push_back(entry);
+                        }
                         entry.clear();
                         position = i+1;
+                        entry_count++;
                     }
                     else if (end_of_line)
                     {

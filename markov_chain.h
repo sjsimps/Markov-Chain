@@ -22,10 +22,17 @@ public:
 
     struct Markov_Cfg
     {
+        //Set to true to accept all input, unfiltered
         bool accept_all;
+
+        //Set to true to separate input data by newline
+        //characters
         bool split_lines;
+
+        //CSV Options
         bool use_csv;
-        int state_length;
+        int csv_column;
+        int csv_n_columns;
     } m_cfg;
 
     std::vector<std::string> m_data;
