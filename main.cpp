@@ -62,15 +62,28 @@ static void set_config(int argc, char* argv[])
     }
 }
 
+template<typename T>
+static void Print_Vector(std::vector<T> arr)
+{
+    const int size = arr.size();
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << "\n";
+}
+
 int main (int argc, char* argv[])
 {
+    std::vector<std::string> sequence;
     chain = new Markov_Chain();
 
     set_config(argc, argv);
 
     chain->Parse_File(file);
     chain->Build_Chain();
-    chain->Output_Chain(out_size);
+    sequence = chain->Output_Chain(out_size);
+    Print_Vector<std::string>(sequence);
 
     delete chain;
 }

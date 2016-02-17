@@ -16,16 +16,25 @@ public:
     Markov_Chain();
     ~Markov_Chain();
 
+    //Add whole file to chain
     void Parse_File(std::string filename);
+
+    //Add individual line to chain
+    void Add_line_to_chain(std::string line);
+
+    //Once all desired data has been added to the chain,
+    //run this method to construct the markov chain.
     void Build_Chain();
-    void Output_Chain (int output_size);
+    
+    //Ouptut random sequence
+    std::vector<std::string> Output_Chain (int output_size);
 
     struct Markov_Cfg
     {
         //Set to true to accept all input, unfiltered
         bool accept_all;
 
-        //Set to true to separate input data by newline
+        //Set to true to separate data lines with newline
         //characters
         bool split_lines;
 
@@ -40,7 +49,6 @@ public:
 
 private:
     bool Is_Valid_Word(std::string word);
-    void Add_line_to_chain(std::string line);
     void Initialize_Cfg();
 };
 

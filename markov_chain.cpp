@@ -27,23 +27,10 @@ void Markov_Chain::Initialize_Cfg()
 
 bool Markov_Chain::Is_Valid_Word(std::string word)
 {
-    bool retval = m_cfg.accept_all;
     std::regex match_word ("[a-zA-Z,\\.\\\"\\']*", std::regex_constants::basic);
-    retval = retval || std::regex_match(word, match_word);
-    return retval;
+    return m_cfg.accept_all || std::regex_match(word, match_word);
 }
 
-#ifdef DEBUG
-static void Print_String_Vector(std::vector<std::string> arr)
-{
-    const int size = arr.size();
-    for (int i = 0; i < size; i++)
-    {
-        std::cout << arr[i] << " ";
-    }
-    std::cout << "\n";
-}
-#endif
 
 void Markov_Chain::Parse_File(std::string filename)
 {
@@ -151,12 +138,12 @@ void Markov_Chain::Add_line_to_chain(std::string line)
     for (int i = 0; i < line_length; i++)
     {
         is_end = (i == line_length - 1) ? 1 : 0;
-        
+
         if (line[i] == ' ' || is_end)
         {
             word = line.substr(position, i - position + is_end);
             position = (++i) % line_length;
-            
+
             if (Is_Valid_Word(word))
             {
                 m_data.push_back(word);
@@ -166,19 +153,18 @@ void Markov_Chain::Add_line_to_chain(std::string line)
     if (m_cfg.split_lines) m_data.push_back("\n");
 }
 
-void Markov_Chain::Output_Chain (int output_size)
+std::vector<std::string> Markov_Chain::Output_Chain (int output_size)
 {
     srand (time(NULL));
-
+    std::vector<std::string> retval;
     int count = 0;
     int val = rand() % m_data.size();
     State state = m_map[m_data[val]];
     Edge* edge = state.edge_list;
 
-    std::cout << "\nOUTPUT:\n" ;
     while (count < output_size && edge != NULL)
     {
-        std::cout << state.data << " ";
+        retval.push_back(state.data);
         val = rand() % state.num_events;
         while(val >= 0 && edge->next_edge != NULL)
         {
@@ -189,7 +175,7 @@ void Markov_Chain::Output_Chain (int output_size)
         edge = state.edge_list;
         count++;
     }
-    std::cout << "\n";
+    return retval;
 }
 
 
