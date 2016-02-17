@@ -14,6 +14,22 @@ Markov_Chain::Markov_Chain()
 
 Markov_Chain::~Markov_Chain()
 {
+    int size = m_data.size();
+    Edge* current;
+    Edge* next;
+    for (int i = 0; i < size; i++)
+    {
+        current = m_map[m_data[i]].edge_list;
+        next = NULL;
+        while (current != NULL)
+        {
+            next = current->next_edge;
+            delete current;
+            current = next;
+        }
+        (&m_map[m_data[i]])->edge_list = NULL;
+    }
+
 }
 
 void Markov_Chain::Initialize_Cfg()
@@ -25,9 +41,9 @@ void Markov_Chain::Initialize_Cfg()
     m_cfg.csv_n_columns = 0;
 }
 
+static std::regex match_word ("[a-zA-Z,\\.\\\"\\']*", std::regex_constants::basic);
 bool Markov_Chain::Is_Valid_Word(std::string word)
 {
-    std::regex match_word ("[a-zA-Z,\\.\\\"\\']*", std::regex_constants::basic);
     return m_cfg.accept_all || std::regex_match(word, match_word);
 }
 
