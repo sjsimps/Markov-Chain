@@ -15,8 +15,8 @@ Markov_Chain::Markov_Chain()
 Markov_Chain::~Markov_Chain()
 {
     int size = m_data.size();
-    Edge* current;
-    Edge* next;
+    Markov_Edge* current;
+    Markov_Edge* next;
     for (int i = 0; i < size; i++)
     {
         current = m_map[m_data[i]].edge_list;
@@ -32,19 +32,27 @@ Markov_Chain::~Markov_Chain()
 
 }
 
+void Markov_Chain::Set_Regex(std::string regex_str)
+{
+    m_cfg.accept_regex = regex_str;
+    m_match_word = std::regex (m_cfg.accept_regex, std::regex_constants::basic);
+}
+
 void Markov_Chain::Initialize_Cfg()
 {
     m_cfg.accept_all = false;
+    Set_Regex( "[a-zA-Z,\\.\\\"\\']*" );
+    m_cfg.delimiter = ' ';
     m_cfg.split_lines = false;
     m_cfg.use_csv = false;
     m_cfg.csv_column = 0;
     m_cfg.csv_n_columns = 0;
 }
 
-static std::regex match_word ("[a-zA-Z,\\.\\\"\\']*", std::regex_constants::basic);
+
 bool Markov_Chain::Is_Valid_Word(std::string word)
 {
-    return m_cfg.accept_all || std::regex_match(word, match_word);
+    return m_cfg.accept_all || std::regex_match(word, m_match_word);
 }
 
 
@@ -98,22 +106,22 @@ void Markov_Chain::Build_Chain()
         }
         else
         {
-            State new_state;
+            Markov_State new_state;
             new_state.num_events = 1;
             new_state.data = m_data[i];
             new_state.edge_list = NULL;
 
-            m_map.insert(std::pair<std::string,State>(m_data[i],new_state));
+            m_map.insert(std::pair<std::string,Markov_State>(m_data[i],new_state));
         }
 
         if (i>0)
         {
-            Edge* index;
+            Markov_Edge* index;
             index = m_map[m_data[i-1]].edge_list;
 
             if (index == NULL)
             {
-                m_map[m_data[i-1]].edge_list = new Edge;
+                m_map[m_data[i-1]].edge_list = new Markov_Edge;
                 index = m_map[m_data[i-1]].edge_list;
                 index->event_rate = 1;
                 index->next_state = &m_map[m_data[i]];
@@ -128,7 +136,7 @@ void Markov_Chain::Build_Chain()
 
                 if (index->next_edge == NULL)
                 {
-                    index->next_edge = new Edge;
+                    index->next_edge = new Markov_Edge;
                     index = index->next_edge;
                     index->event_rate = 1;
                     index->next_state = &m_map[m_data[i]];
@@ -155,7 +163,7 @@ void Markov_Chain::Add_line_to_chain(std::string line)
     {
         is_end = (i == line_length - 1) ? 1 : 0;
 
-        if (line[i] == ' ' || is_end)
+        if (line[i] == m_cfg.delimiter || is_end)
         {
             word = line.substr(position, i - position + is_end);
             position = (++i) % line_length;
@@ -175,8 +183,8 @@ std::vector<std::string> Markov_Chain::Output_Chain (int output_size)
     std::vector<std::string> retval;
     int count = 0;
     int val = rand() % m_data.size();
-    State state = m_map[m_data[val]];
-    Edge* edge = state.edge_list;
+    Markov_State state = m_map[m_data[val]];
+    Markov_Edge* edge = state.edge_list;
 
     while (count < output_size && edge != NULL)
     {
