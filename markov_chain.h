@@ -26,9 +26,15 @@ public:
     //Once all desired data has been added to the chain,
     //run this method to construct the markov chain.
     void Build_Chain();
+
+    //To add a single event to the chain, use this method.
+    void Add_Event(std::string last_event, std::string current_event);
     
     //Ouptut random sequence
     std::vector<std::string> Output_Chain (int output_size);
+
+    //Output current chain status
+    void To_String();
     
     //Data Access:
     // Every input data piece is stored in m_data

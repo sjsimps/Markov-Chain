@@ -96,60 +96,70 @@ void Markov_Chain::Parse_File(std::string filename)
 void Markov_Chain::Build_Chain()
 {
     const int data_size = m_data.size();
+    std::string last_event = "";
+    std::string current_event = "";
 
     for (int i = 0; i < data_size; i++)
     {
-        //If the map contains this state already:
-        if (m_map.count(m_data[i]))
+        last_event = current_event;
+        current_event = m_data[i];
+        Add_Event(last_event, current_event);
+    }
+}
+
+void Markov_Chain::Add_Event(std::string last_event, std::string current_event)
+{
+    //If the map contains this state already, increase event count
+    if (m_map.count(current_event))
+    {
+        m_map[current_event].num_events++;
+    }
+    else
+    //Else create new state for this event
+    {
+        Markov_State new_state;
+        new_state.num_events = 1;
+        new_state.data = current_event;
+        new_state.edge_list = NULL;
+
+        m_map.insert(std::pair<std::string,Markov_State>(current_event,new_state));
+    }
+
+    //If the last event is not empty, update the edge that points to the current event
+    if (last_event != "")
+    {
+        Markov_Edge* index = m_map[last_event].edge_list;
+
+        if (index == NULL)
         {
-            m_map[m_data[i]].num_events++;
+            m_map[last_event].edge_list = new Markov_Edge;
+            index = m_map[last_event].edge_list;
+            index->event_rate = 1;
+            index->next_state = &m_map[current_event];
+            index->next_edge = NULL;
         }
         else
         {
-            Markov_State new_state;
-            new_state.num_events = 1;
-            new_state.data = m_data[i];
-            new_state.edge_list = NULL;
-
-            m_map.insert(std::pair<std::string,Markov_State>(m_data[i],new_state));
-        }
-
-        if (i>0)
-        {
-            Markov_Edge* index;
-            index = m_map[m_data[i-1]].edge_list;
-
-            if (index == NULL)
+            while (index->next_edge != NULL && index->next_state->data != current_event)
             {
-                m_map[m_data[i-1]].edge_list = new Markov_Edge;
-                index = m_map[m_data[i-1]].edge_list;
+                index = index->next_edge;
+            }
+
+            if (index->next_state->data != current_event)
+            {
+                index->next_edge = new Markov_Edge;
+                index = index->next_edge;
                 index->event_rate = 1;
-                index->next_state = &m_map[m_data[i]];
+                index->next_state = &m_map[current_event];
                 index->next_edge = NULL;
             }
             else
             {
-                while (index->next_edge != NULL && index->next_state->data != m_data[i])
-                {
-                    index = index->next_edge;
-                }
-
-                if (index->next_edge == NULL)
-                {
-                    index->next_edge = new Markov_Edge;
-                    index = index->next_edge;
-                    index->event_rate = 1;
-                    index->next_state = &m_map[m_data[i]];
-                    index->next_edge = NULL;
-                }
-                else
-                {
-                    index->event_rate++;
-                }
+                index->event_rate++;
             }
         }
-
     }
+
 }
 
 void Markov_Chain::Add_line_to_chain(std::string line)
@@ -201,6 +211,31 @@ std::vector<std::string> Markov_Chain::Output_Chain (int output_size)
     }
     return retval;
 }
+
+void Markov_Chain::To_String ()
+{
+    Markov_State* state;
+    Markov_Edge* edge;
+    for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
+    {
+        state = &iterator->second;
+        edge = state->edge_list;
+        std::cout<<"\nState: " <<  state->data
+            <<"\nNum Events: " << state->num_events
+            <<"\nNext States: [Frequency / Data]";
+
+        while (edge != NULL)
+        {
+            std::cout <<"\n\t[" << edge->next_state->data << " / " << edge->event_rate << "]";
+            edge = edge->next_edge;
+        }
+
+        std::cout << "\n";
+    }
+
+
+}
+
 
 
 
