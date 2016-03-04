@@ -9,101 +9,23 @@
 
 Markov_Chain::Markov_Chain()
 {
-    Initialize_Cfg();
 }
 
 Markov_Chain::~Markov_Chain()
 {
-    int size = m_data.size();
     Markov_Edge* current;
     Markov_Edge* next;
-    for (int i = 0; i < size; i++)
+    for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        current = m_map[m_data[i]].edge_list;
+        current = ((Markov_State)iterator->second).edge_list;
         next = NULL;
+
         while (current != NULL)
         {
             next = current->next_edge;
             delete current;
             current = next;
         }
-        (&m_map[m_data[i]])->edge_list = NULL;
-    }
-
-}
-
-void Markov_Chain::Set_Regex(std::string regex_str)
-{
-    m_cfg.accept_regex = regex_str;
-    m_match_word = std::regex (m_cfg.accept_regex, std::regex_constants::basic);
-}
-
-void Markov_Chain::Initialize_Cfg()
-{
-    m_cfg.accept_all = false;
-    Set_Regex( "[a-zA-Z,\\.\\\"\\']*" );
-    m_cfg.delimiter = ' ';
-    m_cfg.split_lines = false;
-    m_cfg.use_csv = false;
-    m_cfg.csv_column = 0;
-    m_cfg.csv_n_columns = 0;
-}
-
-
-bool Markov_Chain::Is_Valid_Word(std::string word)
-{
-    return m_cfg.accept_all || std::regex_match(word, m_match_word);
-}
-
-
-void Markov_Chain::Parse_File(std::string filename)
-{
-    std::ifstream file;
-    std::string line;
-
-
-    file.open(filename);
-    if (! m_cfg.use_csv)
-    {
-        if (file.is_open())
-        {
-            while ( getline (file,line) )
-            {
-                Add_line_to_chain(line);
-            }
-            file.close();
-        }
-        else
-        {
-            std::cout << "File \"" << filename << "\" could not be opened!";
-            exit(EXIT_FAILURE);
-        }
-    }
-    else //Parse input as CSV
-    {
-        CSV_Parser* csv = new CSV_Parser();
-        csv->Set_Data(filename, m_cfg.csv_column, m_cfg.csv_n_columns);
-        for (int i = 0; i < csv->m_size; i++)
-        {
-            line = csv->Get_Entry(i);
-            Add_line_to_chain(line);
-        }
-        delete csv;
-    }
-
-}
-
-void Markov_Chain::Build_Chain()
-{
-    const int data_size = m_data.size();
-    std::string last_event = "";
-    std::string current_event = "";
-
-    for (int i = 0; i < data_size; i++)
-    {
-        last_event = current_event;
-        current_event = m_data[i];
-        Add_Event(last_event, current_event);
     }
 }
 
@@ -162,56 +84,6 @@ void Markov_Chain::Add_Event(std::string last_event, std::string current_event)
 
 }
 
-void Markov_Chain::Add_line_to_chain(std::string line)
-{
-    int position = 0;
-    int is_end;
-    std::string word;
-    int line_length = line.length();
-
-    for (int i = 0; i < line_length; i++)
-    {
-        is_end = (i == line_length - 1) ? 1 : 0;
-
-        if (line[i] == m_cfg.delimiter || is_end)
-        {
-            word = line.substr(position, i - position + is_end);
-            position = (++i) % line_length;
-
-            if (Is_Valid_Word(word))
-            {
-                m_data.push_back(word);
-            }
-        }
-    }
-    if (m_cfg.split_lines) m_data.push_back("\n");
-}
-
-std::vector<std::string> Markov_Chain::Output_Chain (int output_size)
-{
-    srand (time(NULL));
-    std::vector<std::string> retval;
-    int count = 0;
-    int val = rand() % m_data.size();
-    Markov_State state = m_map[m_data[val]];
-    Markov_Edge* edge = state.edge_list;
-
-    while (count < output_size && edge != NULL)
-    {
-        retval.push_back(state.data);
-        val = rand() % state.num_events;
-        while(val >= 0 && edge->next_edge != NULL)
-        {
-            val -= edge->event_rate;
-            if (val >= 0) edge = edge->next_edge;
-        }
-        state = *edge->next_state;
-        edge = state.edge_list;
-        count++;
-    }
-    return retval;
-}
-
 void Markov_Chain::To_String ()
 {
     Markov_State* state;
@@ -232,8 +104,34 @@ void Markov_Chain::To_String ()
 
         std::cout << "\n";
     }
+}
 
+std::vector<std::string> Markov_Chain::Output_Random_Sequence (int output_size)
+{
+    srand (time(NULL));
+    std::vector<std::string> retval;
+    int count = 0;
+    int val = rand() % m_map.size();
+    
+    auto item = m_map.begin();
+    std::advance( item, val );
+    Markov_State state = item->second; 
+    Markov_Edge* edge = state.edge_list;
 
+    while (count < output_size && edge != NULL)
+    {
+        retval.push_back(state.data);
+        val = rand() % state.num_events;
+        while(val >= 0 && edge->next_edge != NULL)
+        {
+            val -= edge->event_rate;
+            if (val >= 0) edge = edge->next_edge;
+        }
+        state = *edge->next_state;
+        edge = state.edge_list;
+        count++;
+    }
+    return retval;
 }
 
 

@@ -3,10 +3,10 @@
 #include <getopt.h>
 
 #include "csv_parser.h"
-#include "markov_chain.h"
+#include "markov_chain_builder.h"
 
 static std::string file = "";
-static Markov_Chain* chain;
+static Markov_Chain_Builder* chain;
 static int out_size = 25;
 static bool print_debug = false;
 
@@ -92,15 +92,15 @@ static void Print_Vector(std::vector<T> arr)
 int main (int argc, char* argv[])
 {
     std::vector<std::string> sequence;
-    chain = new Markov_Chain();
+    chain = new Markov_Chain_Builder();
 
     set_config(argc, argv);
 
-    chain->Parse_File(file);
+    chain->Add_File_To_Chain(file);
     chain->Build_Chain();
-    sequence = chain->Output_Chain(out_size);
+    sequence = chain->m_chain.Output_Random_Sequence(out_size);
     Print_Vector<std::string>(sequence);
-    if (print_debug) chain->To_String();
+    if (print_debug) chain->m_chain.To_String();
 
     delete chain;
     return EXIT_SUCCESS;
