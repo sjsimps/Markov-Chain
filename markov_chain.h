@@ -17,19 +17,22 @@ public:
     Markov_Chain();
     ~Markov_Chain();
 
+    //Adds a sequence of events to the chain
+    void Add_Event(std::vector<T> data);
+
     //Adds event to chain with previous state information
     void Add_Event(T last_event, T current_event);
 
     //Adds a single event without a previous state
     void Add_Event(T current_event);
 
-    //Output randomized state sequence
+    //Outputs randomized state sequence
     std::vector<T> Output_Random_Sequence (int output_length);
 
-    //Output current chain status to console
+    //Outputs current chain status to console
     void To_String();
 
-    // Every Markov state is indexed by m_map using a data string
+    //Every Markov state is indexed by m_map using a data element
     std::map<T,Markov_State<T>> m_map;
 
 };
@@ -143,6 +146,17 @@ void Markov_Chain<T>::Add_Event(T last_event, T current_event)
         }
     }
 
+}
+
+template <class T>
+void Markov_Chain<T>::Add_Event(std::vector<T> data)
+{
+    Add_Event(data[0]);
+    
+    for(unsigned int i = 1; i < data.size(); i++)
+    {
+        Add_Event(data[i-1], data[i]);
+    }
 }
 
 template <class T>
