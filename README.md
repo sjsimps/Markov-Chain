@@ -13,7 +13,7 @@ into your code.
 
 ![alt_tag](https://github.com/sjsimps/Markov-Chain/blob/master/Test/rock_paper_scissors.png)
 
-The Markov chain utility can export to a graphviz file to visualize a markov chain. To
+The Markov chain utility can export to a graphviz file to provide a visual representation of the markov chain. To
 visualize the output of the markov chain there are two options:
 
 1: Run the "visualize" script:
