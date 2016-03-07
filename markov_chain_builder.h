@@ -31,7 +31,7 @@ public:
     
     std::vector<std::string> m_data;
 
-    Markov_Chain m_chain;
+    Markov_Chain<std::string> m_chain;
 
     //Configurations:
     struct Markov_Cfg

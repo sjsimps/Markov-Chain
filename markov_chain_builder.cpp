@@ -81,9 +81,11 @@ void Markov_Chain_Builder::Build_Chain()
 {
     const int data_size = m_data.size();
     std::string last_event = "";
-    std::string current_event = "";
+    std::string current_event = m_data[0];
 
-    for (int i = 0; i < data_size; i++)
+    m_chain.Add_Event(current_event);
+
+    for (int i = 1; i < data_size; i++)
     {
         last_event = current_event;
         current_event = m_data[i];

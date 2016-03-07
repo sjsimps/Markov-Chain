@@ -1,7 +1,7 @@
 CPP_FLAGS = -Wall -std=c++11
 DEBUG_FLAGS += -g -O0
 PROG = markov
-SRC = main.cpp markov_chain_builder.cpp markov_chain.cpp csv_parser.cpp
+SRC = main.cpp markov_chain_builder.cpp csv_parser.cpp
 INC = markov_chain_builder.h markov_chain.h csv_parser.h
 
 .PHONY: all
