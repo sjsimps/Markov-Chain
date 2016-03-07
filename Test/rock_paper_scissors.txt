@@ -1,0 +1,6 @@
+rock paper scissors
+rock rock paper
+paper paper scissors
+paper rock paper
+paper rock rock
+scissors rock paper

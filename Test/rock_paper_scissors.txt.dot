@@ -1,0 +1,14 @@
+
+digraph markov_chain{
+paper [label="paper"]
+rock [label="rock"]
+scissors [label="scissors"]
+paper -> scissors [label="28"]
+paper -> paper [label="42"]
+paper -> rock [label="28"]
+rock -> paper [label="57"]
+rock -> rock [label="28"]
+rock -> scissors [label="14"]
+scissors -> rock [label="66"]
+scissors -> paper [label="33"]
+}
