@@ -1,7 +1,12 @@
 #Markov Chain
 This project provides a [Markov chain](https://en.wikipedia.org/wiki/Markov_chain) data structure to be
-incorporated into other projects, and also provides a Markov chain utility. To use the data structure in
-your own project, simply include [Markov_Chain/markov_chain.h](https://github.com/sjsimps/Markov-Chain/blob/master/Markov_Chain/markov_chain.h)
+incorporated into other projects, and also provides a Markov chain utility that may be used to visualize
+the chain or output a randomized sequence of states.
+
+###Markov Chain Data Structure:
+
+To use the data structure in your own project, simply include
+[Markov_Chain/markov_chain.h](https://github.com/sjsimps/Markov-Chain/blob/master/Markov_Chain/markov_chain.h)
 into your code.
 
 ###Markov Chain Utility: Graph Visualization
@@ -24,7 +29,13 @@ Test/rock_paper_scissors.txt
 ~/Development/Markov$ xdot test.dot
 ```
 
-To visualize the Markov chain, [xdot](https://apps.ubuntu.com/cat/applications/natty/xdot/) must be installed, or another graphviz visualization tool must be used.
+To visualize the Markov chain, [xdot](https://apps.ubuntu.com/cat/applications/natty/xdot/) must be
+installed, or another graphviz visualization tool must be used.
+
+###Markov Chain Utility: Randomized Output
+
+The Markov chain utility may be used to generate a randomized sequence of given the probability mappings
+of the Markov chain. Here's an example use case that [generates randomized New York Times headlines](https://github.com/sjsimps/NY-Times-Headline-Generator).
 
 ###Markov Chain Utility: General
 
