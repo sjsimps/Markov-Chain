@@ -99,22 +99,18 @@ void Markov_Chain<T>::Add_Event(T current_event)
 template <class T>
 void Markov_Chain<T>::Add_Event(T last_event, T current_event)
 {
-    //If the map contains this state already, increase event count
-    if (m_map.count(current_event))
-    {
-        m_map[current_event].num_events++;
-    }
-    else
-    //Else create new state for this event
+    //Create new state for this event if it does not exist
+    if (m_map.count(current_event) == 0)
     {
         Markov_State<T> new_state;
-        new_state.num_events = 1;
+        new_state.num_events = 0;
         new_state.data = current_event;
         new_state.edge_list = NULL;
         m_map.insert(std::pair<T,Markov_State<T>>(current_event,new_state));
     }
 
     //Update the edge that points from the last to the current event
+    m_map[last_event].num_events++;
     Markov_Edge<T>* index = m_map[last_event].edge_list;
 
     if (index == NULL)
@@ -152,7 +148,7 @@ template <class T>
 void Markov_Chain<T>::Add_Event(std::vector<T> data)
 {
     Add_Event(data[0]);
-    
+
     for(unsigned int i = 1; i < data.size(); i++)
     {
         Add_Event(data[i-1], data[i]);
@@ -189,10 +185,10 @@ std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size)
     std::vector<T> retval;
     int count = 0;
     int val = rand() % m_map.size();
-    
+
     auto item = m_map.begin();
     std::advance( item, val );
-    Markov_State<T> state = item->second; 
+    Markov_State<T> state = item->second;
     Markov_Edge<T>* edge = state.edge_list;
 
     while (count < output_size && edge != NULL)

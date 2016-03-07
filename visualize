@@ -1,0 +1,22 @@
+#!/bin/bash
+
+make
+
+echo "Please enter input file: "
+read -e file
+
+while [ ! -f "$file" ]; do
+    echo "File not found. Please enter input file:"
+    read -e file
+done
+
+echo "Generating Markov Chain:" ;
+./markov -f "$file" -g "$file".dot -r "[a-zA-Z][a-zA-Z]*" -d -s 0
+
+printf "\n\nRendering Graphviz Image:\n"
+
+if ! type xdot > /dev/null; then
+    echo "Xdot is not installed. Install Xdot to view .dot file."
+else
+    xdot "$file".dot
+fi
