@@ -18,13 +18,13 @@ public:
     ~Markov_Chain();
 
     //Adds a sequence of events to the chain
-    void Add_Event(std::vector<T> data);
+    void Add_Event_Sequence(std::vector<T> data);
 
     //Adds event to chain with previous state information
     void Add_Event(T last_event, T current_event);
 
-    //Adds a single event without a previous state
-    void Add_Event(T current_event);
+    //Adds a single node without a previous state
+    void Add_Node(T current_event);
 
     //Outputs randomized state sequence
     std::vector<T> Output_Random_Sequence (int output_length);
@@ -81,7 +81,7 @@ Markov_Chain<T>::~Markov_Chain()
 
 //Insert new event with no edges
 template <class T>
-void Markov_Chain<T>::Add_Event(T current_event)
+void Markov_Chain<T>::Add_Node(T current_event)
 {
     if (m_map.count(current_event) == 0)
     {
@@ -89,7 +89,6 @@ void Markov_Chain<T>::Add_Event(T current_event)
         new_state.num_events = 0;
         new_state.data = current_event;
         new_state.edge_list = NULL;
-
         m_map.insert(std::pair<T,Markov_State<T>>(current_event,new_state));
     }
 }
@@ -99,15 +98,8 @@ void Markov_Chain<T>::Add_Event(T current_event)
 template <class T>
 void Markov_Chain<T>::Add_Event(T last_event, T current_event)
 {
-    //Create new state for this event if it does not exist
-    if (m_map.count(current_event) == 0)
-    {
-        Markov_State<T> new_state;
-        new_state.num_events = 0;
-        new_state.data = current_event;
-        new_state.edge_list = NULL;
-        m_map.insert(std::pair<T,Markov_State<T>>(current_event,new_state));
-    }
+    Add_Node(current_event);
+    Add_Node(last_event);
 
     //Update the edge that points from the last to the current event
     m_map[last_event].num_events++;
@@ -145,10 +137,8 @@ void Markov_Chain<T>::Add_Event(T last_event, T current_event)
 }
 
 template <class T>
-void Markov_Chain<T>::Add_Event(std::vector<T> data)
+void Markov_Chain<T>::Add_Event_Sequence(std::vector<T> data)
 {
-    Add_Event(data[0]);
-
     for(unsigned int i = 1; i < data.size(); i++)
     {
         Add_Event(data[i-1], data[i]);

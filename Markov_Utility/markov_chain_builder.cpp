@@ -79,7 +79,7 @@ void Markov_Chain_Builder::Add_File_To_Chain(std::string filename)
 
 void Markov_Chain_Builder::Build_Chain()
 {
-   m_chain.Add_Event(m_data); 
+   m_chain.Add_Event_Sequence(m_data); 
 }
 
 void Markov_Chain_Builder::Add_Line_To_Chain(std::string line)
@@ -119,7 +119,7 @@ void Markov_Chain_Builder::Visualize(std::string file)
     for(auto iterator = m_chain.m_map.begin(); iterator != m_chain.m_map.end(); iterator++)
     {
         state = ((Markov_State<std::string>)iterator->second);
-        out << "\n" <<  state.data << " [label=\"" << state.data << "\"]";
+        out << "\n" <<  state.data << " [label=\"" << state.data << "\"];";
     }
 
     for(auto iterator = m_chain.m_map.begin(); iterator != m_chain.m_map.end(); iterator++)
@@ -130,7 +130,7 @@ void Markov_Chain_Builder::Visualize(std::string file)
         {
             probability = (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
 
-            out << "\n" << state.data << " -> " << edge->next_state->data << " [label=\"" << probability << "\"]";
+            out << "\n" << state.data << " -> " << edge->next_state->data << " [label=\"" << probability << "\"];";
             edge = edge->next_edge;
         }
     }
