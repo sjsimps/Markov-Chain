@@ -21,7 +21,7 @@ public:
     void Add_Event_Sequence(std::vector<T> data);
 
     //Adds event to chain with previous state information
-    void Add_Event(T last_event, T current_event);
+    void Add_Event(T last_event, T current_event, unsigned int num_events = 1);
 
     //Adds a single node without a previous state
     void Add_Node(T current_event);
@@ -96,20 +96,20 @@ void Markov_Chain<T>::Add_Node(T current_event)
 //Insert new event with an edge from the previous state:
 // Last Event -> Current Event
 template <class T>
-void Markov_Chain<T>::Add_Event(T last_event, T current_event)
+void Markov_Chain<T>::Add_Event(T last_event, T current_event, unsigned int num_events)
 {
     Add_Node(current_event);
     Add_Node(last_event);
 
     //Update the edge that points from the last to the current event
-    m_map[last_event].num_events++;
+    m_map[last_event].num_events += num_events;
     Markov_Edge<T>* index = m_map[last_event].edge_list;
 
     if (index == NULL)
     {
         m_map[last_event].edge_list = new Markov_Edge<T>;
         index = m_map[last_event].edge_list;
-        index->event_rate = 1;
+        index->event_rate = num_events;
         index->next_state = &m_map[current_event];
         index->next_edge = NULL;
     }
@@ -124,13 +124,13 @@ void Markov_Chain<T>::Add_Event(T last_event, T current_event)
         {
             index->next_edge = new Markov_Edge<T>;
             index = index->next_edge;
-            index->event_rate = 1;
+            index->event_rate = num_events;
             index->next_state = &m_map[current_event];
             index->next_edge = NULL;
         }
         else
         {
-            index->event_rate++;
+            index->event_rate += num_events;
         }
     }
 
