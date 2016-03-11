@@ -30,7 +30,7 @@ public:
     std::vector<T> Output_Random_Sequence (int output_length);
 
     //Outputs current chain status to console
-    void To_String();
+    void Print_To_Console();
 
     //Every Markov state is indexed by m_map using a data element
     std::map<T,Markov_State<T>> m_map;
@@ -139,14 +139,56 @@ void Markov_Chain<T>::Add_Event(T last_event, T current_event, unsigned int num_
 template <class T>
 void Markov_Chain<T>::Add_Event_Sequence(std::vector<T> data)
 {
+    Add_Node(data[0]);
+
+    Markov_Edge<T>* index;
+    Markov_State<T>* last_state;
+    Markov_State<T>* current_state = &m_map[data[0]];
+
     for(unsigned int i = 1; i < data.size(); i++)
     {
-        Add_Event(data[i-1], data[i]);
+        Add_Node(data[i]);
+
+        last_state = current_state;
+        current_state = &m_map[data[i]];
+
+        //Update the edge that points from the last to the current event
+        last_state->num_events += 1;
+        index = last_state->edge_list;
+
+        if (index == NULL)
+        {
+            last_state->edge_list = new Markov_Edge<T>;
+            index = last_state->edge_list;
+            index->event_rate = 1;
+            index->next_state = current_state;
+            index->next_edge = NULL;
+        }
+        else
+        {
+            while (index->next_edge != NULL && index->next_state->data != data[i])
+            {
+                index = index->next_edge;
+            }
+
+            if (index->next_state->data != data[i])
+            {
+                index->next_edge = new Markov_Edge<T>;
+                index = index->next_edge;
+                index->event_rate = 1;
+                index->next_state = current_state;
+                index->next_edge = NULL;
+            }
+            else
+            {
+                index->event_rate += 1;
+            }
+        }
     }
 }
 
 template <class T>
-void Markov_Chain<T>::To_String ()
+void Markov_Chain<T>::Print_To_Console ()
 {
     Markov_State<T>* state;
     Markov_Edge<T>* edge;
