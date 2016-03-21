@@ -30,6 +30,9 @@ public:
     //Adds a single node without a previous state
     void Add_Node(T current_event);
 
+    //Returns the probability of transitioning from event A to B
+    float Get_Probability(T A, T B);
+
     //Outputs randomized state sequence
     std::vector<T> Output_Random_Sequence (int output_length);
 
@@ -219,6 +222,24 @@ void Markov_Chain<T>::Remove_Event(T last_event, T current_event)
             }
         }
     }
+}
+
+template <class T>
+float Markov_Chain<T>::Get_Probability(T A, T B)
+{
+    Markov_State<T>* state = &m_map[A];
+    Markov_Edge<T>* index = state->edge_list;
+
+    if (m_map.count(A) && m_map.count(B))
+    {
+        while (index != NULL && index->next_state->data != B)
+        {
+            index = index->next_edge;
+        }
+
+        if (index != NULL) return ((float)index->event_rate) / ((float)state->num_events);
+    }
+    return 0;
 }
 
 template <class T>
