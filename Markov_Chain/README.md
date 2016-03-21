@@ -44,7 +44,7 @@ markov chain of type std::string:
 
 ```C++
 //Construct new chain
-Markov_Chain<std::string>* chain = new Markov_Chain();
+Markov_Chain<std::string>* chain = new Markov_Chain<std::string>();
 
 //Create nodes and edges
 chain->Add_Event("a", "b", 3);
