@@ -1,4 +1,4 @@
-#Using the Markov_Chain Data Structure:
+#Using the Markov Chain Data Structure:
 
 This document overviews how to use the markov chain data structure
 as contained within
@@ -14,6 +14,8 @@ void Add_Node(T current_event);
 ###Adding Edges:
 
 ```C++
+//Adding edges between nodes that do not exist will automatically create the appropriate nodes
+
 //Adds a sequence of events to the chain
 void Add_Event_Sequence(std::vector<T> data);
 
@@ -61,6 +63,8 @@ delete chain;
 ```
 
 Visual Output:
+
+![alt_tag](https://github.com/sjsimps/Markov-Chain/blob/master/Test/abc.png)
 
 Console Output:
 
