@@ -24,6 +24,9 @@ public:
     //Adds event to chain with previous state information
     void Add_Event(T last_event, T current_event, unsigned int num_events = 1);
 
+    //Completely removes edge between two nodes
+    void Remove_Event(T last_event, T current_event);
+
     //Adds a single node without a previous state
     void Add_Node(T current_event);
 
@@ -193,6 +196,32 @@ void Markov_Chain<T>::Add_Event_Sequence(std::vector<T> data)
 }
 
 template <class T>
+void Markov_Chain<T>::Remove_Event(T last_event, T current_event)
+{
+    if (m_map.count(current_event) && m_map.count(last_event))
+    {
+        Markov_State<T>* state = &m_map[last_event];
+        Markov_Edge<T>** index = &state->edge_list;
+
+        if ((*index) != NULL)
+        {
+            while ((*index)->next_edge != NULL && (*index)->next_state->data != current_event)
+            {
+                index = &(*index)->next_edge;
+            }
+
+            if ((*index) != NULL)
+            {
+                state->num_events -= (*index)->event_rate;
+                Markov_Edge<T>* todelete = *index;
+                *index = (*index)->next_edge;
+                delete todelete;
+            }
+        }
+    }
+}
+
+template <class T>
 void Markov_Chain<T>::Print_To_Console ()
 {
     Markov_State<T>* state;
@@ -266,7 +295,8 @@ void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
         edge  = state.edge_list;
         while (edge != NULL)
         {
-            probability = (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
+            probability = (state.num_events == 0) ?
+                0 : (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
 
             out << "\n_" << state.data << " -> _" << edge->next_state->data << " [label=\"" << probability << "\"];";
             edge = edge->next_edge;
