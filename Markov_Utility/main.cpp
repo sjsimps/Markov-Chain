@@ -107,7 +107,7 @@ int main (int argc, char* argv[])
     sequence = chain->m_chain.Output_Random_Sequence(out_size);
     Print_Vector<std::string>(sequence);
     if (print_debug) chain->m_chain.Print_To_Console();
-    if (graph != "") chain->Visualize(graph);
+    if (graph != "") chain->m_chain.Export_To_Graphviz(graph);
 
     delete chain;
     return EXIT_SUCCESS;

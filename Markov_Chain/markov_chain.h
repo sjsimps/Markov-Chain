@@ -3,6 +3,7 @@
 #define MARKOV_CHAIN_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -31,6 +32,10 @@ public:
 
     //Outputs current chain status to console
     void Print_To_Console();
+
+    //Writes markov chain to [.dot] format for visualization
+    //Each data element's string conversion must operate as a valid graphviz ID to operate properly
+    void Export_To_Graphviz(std::string filename);
 
     //Every Markov state is indexed by m_map using a data element
     std::map<T,Markov_State<T>> m_map;
@@ -237,6 +242,39 @@ std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size)
         count++;
     }
     return retval;
+}
+
+template <class T>
+void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
+{
+    Markov_State<std::string> state;
+    Markov_Edge<std::string>* edge;
+    std::ofstream out(filename);
+    int probability = 0;
+
+    out << "\ndigraph markov_chain{";
+
+    for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
+    {
+        state = ((Markov_State<std::string>)iterator->second);
+        out << "\n" <<  state.data << " [label=\"" << state.data << "\"];";
+    }
+
+    for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
+    {
+        state = ((Markov_State<std::string>)iterator->second);
+        edge  = state.edge_list;
+        while (edge != NULL)
+        {
+            probability = (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
+
+            out << "\n" << state.data << " -> " << edge->next_state->data << " [label=\"" << probability << "\"];";
+            edge = edge->next_edge;
+        }
+    }
+
+    out << "\n}";
+    out.close();
 }
 
 #endif

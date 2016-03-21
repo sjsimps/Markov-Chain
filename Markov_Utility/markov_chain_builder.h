@@ -29,9 +29,6 @@ public:
     //Ouptut random sequence
     std::vector<std::string> Output_Chain (int output_size);
 
-    //Create chain digraph
-    void Visualize(std::string file);
-    
     std::vector<std::string> m_data;
 
     Markov_Chain<std::string> m_chain;

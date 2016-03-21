@@ -107,36 +107,4 @@ void Markov_Chain_Builder::Add_Line_To_Chain(std::string line)
     if (m_cfg.split_lines) m_data.push_back("\n");
 }
 
-void Markov_Chain_Builder::Visualize(std::string file)
-{
-    Markov_State<std::string> state;
-    Markov_Edge<std::string>* edge;
-    std::ofstream out(file);
-    int probability = 0;
-
-    out << "\ndigraph markov_chain{";
-
-    for(auto iterator = m_chain.m_map.begin(); iterator != m_chain.m_map.end(); iterator++)
-    {
-        state = ((Markov_State<std::string>)iterator->second);
-        out << "\n" <<  state.data << " [label=\"" << state.data << "\"];";
-    }
-
-    for(auto iterator = m_chain.m_map.begin(); iterator != m_chain.m_map.end(); iterator++)
-    {
-        state = ((Markov_State<std::string>)iterator->second);
-        edge  = state.edge_list;
-        while (edge != NULL)
-        {
-            probability = (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
-
-            out << "\n" << state.data << " -> " << edge->next_state->data << " [label=\"" << probability << "\"];";
-            edge = edge->next_edge;
-        }
-    }
-
-    out << "\n}";
-    out.close();
-}
-
 
