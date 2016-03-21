@@ -247,8 +247,8 @@ std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size)
 template <class T>
 void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
 {
-    Markov_State<std::string> state;
-    Markov_Edge<std::string>* edge;
+    Markov_State<T> state;
+    Markov_Edge<T>* edge;
     std::ofstream out(filename);
     int probability = 0;
 
@@ -256,19 +256,19 @@ void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
 
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        state = ((Markov_State<std::string>)iterator->second);
-        out << "\n" <<  state.data << " [label=\"" << state.data << "\"];";
+        state = ((Markov_State<T>)iterator->second);
+        out << "\n_" <<  state.data << " [label=\"" << state.data << "\"];";
     }
 
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        state = ((Markov_State<std::string>)iterator->second);
+        state = ((Markov_State<T>)iterator->second);
         edge  = state.edge_list;
         while (edge != NULL)
         {
             probability = (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
 
-            out << "\n" << state.data << " -> " << edge->next_state->data << " [label=\"" << probability << "\"];";
+            out << "\n_" << state.data << " -> _" << edge->next_state->data << " [label=\"" << probability << "\"];";
             edge = edge->next_edge;
         }
     }
