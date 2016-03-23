@@ -34,7 +34,7 @@ void Export_To_Graphviz(std::string filename);
 
 ```C++
 //Outputs randomized node sequence
-std::vector<T> Output_Random_Sequence (int output_length);
+std::vector<T> Output_Random_Sequence (int output_length, T start_node, bool random_start);
 ```
 
 ###Sample Code:
