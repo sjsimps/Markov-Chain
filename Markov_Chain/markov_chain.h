@@ -8,8 +8,8 @@
 #include <vector>
 #include <map>
 
-template <class T> struct Markov_Edge;
-template <class T> struct Markov_State;
+template <class T> struct Markov_Event;
+template <class T> struct Markov_Node;
 
 template <class T>
 class Markov_Chain
@@ -18,23 +18,24 @@ public:
     Markov_Chain();
     ~Markov_Chain();
 
-    //Adds a sequence of events to the chain
-    void Add_Event_Sequence(std::vector<T> data);
+    //Adds a single node without any events
+    void Add_Node(T node);
 
-    //Adds event to chain with previous state information
-    void Add_Event(T last_event, T current_event, unsigned int num_events = 1);
+    //Adds a sequence of events to the chain through a vector of nodes
+    void Add_Event_Sequence(std::vector<T> node_sequence);
 
-    //Completely removes edge between two nodes
-    void Remove_Event(T last_event, T current_event);
+    //Adds event to chain from the last_node to next_node
+    //num_events determines the weight of the event
+    void Add_Event(T last_node, T next_node, unsigned int num_events = 1);
 
-    //Adds a single node without a previous state
-    void Add_Node(T current_event);
+    //Removes all events between two nodes
+    void Remove_Event(T last_node, T next_node);
 
-    //Returns the probability of transitioning from event A to B
-    float Get_Probability(T A, T B);
+    //Returns the probability of transitioning from last_node to next_node
+    float Get_Probability(T last_node, T next_node);
 
-    //Outputs randomized state sequence
-    std::vector<T> Output_Random_Sequence (int output_length);
+    //Outputs randomized node sequence
+    std::vector<T> Output_Random_Sequence (int output_length, T start_node, bool random_start);
 
     //Outputs current chain status to console
     void Print_To_Console();
@@ -43,25 +44,25 @@ public:
     //Each data element's string conversion must operate as a valid graphviz ID to operate properly
     void Export_To_Graphviz(std::string filename);
 
-    //Every Markov state is indexed by m_map using a data element
-    std::map<T,Markov_State<T>> m_map;
+    //Every Markov node is indexed by m_map using a data element
+    std::map<T,Markov_Node<T>> m_map;
 
 };
 
 template <class T>
-struct Markov_State
+struct Markov_Node
 {
-    T data;       //Data that corresponds to this state
-    unsigned int num_events;//Number of times this state has occured given the input data
-    Markov_Edge<T>* edge_list; //List containing all edges to a next possible state
+    T data;
+    unsigned int num_events;
+    Markov_Event<T>* event_list;
 };
 
 template <class T>
-struct Markov_Edge
+struct Markov_Event
 {
-    unsigned int event_rate; //Number of time this edge has been taken from previous state given the input data
-    Markov_State<T>* next_state;//Next state corresponding to this edge
-    Markov_Edge<T>* next_edge;  //Next edge within the edge list
+    unsigned int event_rate;
+    Markov_Node<T>* next_node;
+    Markov_Event<T>* next_event;
 };
 
 ////////// - MARKOV CHAIN IMPLEMENTATION - //////////
@@ -74,70 +75,70 @@ Markov_Chain<T>::Markov_Chain()
 template <class T>
 Markov_Chain<T>::~Markov_Chain()
 {
-    Markov_Edge<T>* current;
-    Markov_Edge<T>* next;
+    Markov_Event<T>* current;
+    Markov_Event<T>* next;
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        current = ((Markov_State<T>)iterator->second).edge_list;
+        current = ((Markov_Node<T>)iterator->second).event_list;
         next = NULL;
 
         while (current != NULL)
         {
-            next = current->next_edge;
+            next = current->next_event;
             delete current;
             current = next;
         }
     }
 }
 
-//Insert new event with no edges
+//Insert new event with no events
 template <class T>
-void Markov_Chain<T>::Add_Node(T current_event)
+void Markov_Chain<T>::Add_Node(T node)
 {
-    if (m_map.count(current_event) == 0)
+    if (m_map.count(node) == 0)
     {
-        Markov_State<T> new_state;
-        new_state.num_events = 0;
-        new_state.data = current_event;
-        new_state.edge_list = NULL;
-        m_map.insert(std::pair<T,Markov_State<T>>(current_event,new_state));
+        Markov_Node<T> new_node;
+        new_node.num_events = 0;
+        new_node.data = node;
+        new_node.event_list = NULL;
+        m_map.insert(std::pair<T,Markov_Node<T>>(node,new_node));
     }
 }
 
-//Insert new event with an edge from the previous state:
+//Insert new event with an event from the previous node:
 // Last Event -> Current Event
 template <class T>
-void Markov_Chain<T>::Add_Event(T last_event, T current_event, unsigned int num_events)
+void Markov_Chain<T>::Add_Event(T last_node, T next_node, unsigned int num_events)
 {
-    Add_Node(current_event);
-    Add_Node(last_event);
+    Add_Node(next_node);
+    Add_Node(last_node);
 
-    //Update the edge that points from the last to the current event
-    m_map[last_event].num_events += num_events;
-    Markov_Edge<T>* index = m_map[last_event].edge_list;
+    //Update the event that points from the last to the current event
+    m_map[last_node].num_events += num_events;
+    Markov_Event<T>* index = m_map[last_node].event_list;
 
     if (index == NULL)
     {
-        m_map[last_event].edge_list = new Markov_Edge<T>;
-        index = m_map[last_event].edge_list;
+        m_map[last_node].event_list = new Markov_Event<T>;
+        index = m_map[last_node].event_list;
         index->event_rate = num_events;
-        index->next_state = &m_map[current_event];
-        index->next_edge = NULL;
+        index->next_node = &m_map[next_node];
+        index->next_event = NULL;
     }
     else
     {
-        while (index->next_edge != NULL && index->next_state->data != current_event)
+        while (index->next_event != NULL && index->next_node->data != next_node)
         {
-            index = index->next_edge;
+            index = index->next_event;
         }
 
-        if (index->next_state->data != current_event)
+        if (index->next_node->data != next_node)
         {
-            index->next_edge = new Markov_Edge<T>;
-            index = index->next_edge;
+            index->next_event = new Markov_Event<T>;
+            index = index->next_event;
             index->event_rate = num_events;
-            index->next_state = &m_map[current_event];
-            index->next_edge = NULL;
+            index->next_node = &m_map[next_node];
+            index->next_event = NULL;
         }
         else
         {
@@ -152,43 +153,43 @@ void Markov_Chain<T>::Add_Event_Sequence(std::vector<T> data)
 {
     Add_Node(data[0]);
 
-    Markov_Edge<T>* index;
-    Markov_State<T>* last_state;
-    Markov_State<T>* current_state = &m_map[data[0]];
+    Markov_Event<T>* index;
+    Markov_Node<T>* last_node;
+    Markov_Node<T>* current_node = &m_map[data[0]];
 
     for(unsigned int i = 1; i < data.size(); i++)
     {
         Add_Node(data[i]);
 
-        last_state = current_state;
-        current_state = &m_map[data[i]];
+        last_node = current_node;
+        current_node = &m_map[data[i]];
 
-        //Update the edge that points from the last to the current event
-        last_state->num_events += 1;
-        index = last_state->edge_list;
+        //Update the event that points from the last to the current event
+        last_node->num_events += 1;
+        index = last_node->event_list;
 
         if (index == NULL)
         {
-            last_state->edge_list = new Markov_Edge<T>;
-            index = last_state->edge_list;
+            last_node->event_list = new Markov_Event<T>;
+            index = last_node->event_list;
             index->event_rate = 1;
-            index->next_state = current_state;
-            index->next_edge = NULL;
+            index->next_node = current_node;
+            index->next_event = NULL;
         }
         else
         {
-            while (index->next_edge != NULL && index->next_state->data != data[i])
+            while (index->next_event != NULL && index->next_node->data != data[i])
             {
-                index = index->next_edge;
+                index = index->next_event;
             }
 
-            if (index->next_state->data != data[i])
+            if (index->next_node->data != data[i])
             {
-                index->next_edge = new Markov_Edge<T>;
-                index = index->next_edge;
+                index->next_event = new Markov_Event<T>;
+                index = index->next_event;
                 index->event_rate = 1;
-                index->next_state = current_state;
-                index->next_edge = NULL;
+                index->next_node = current_node;
+                index->next_event = NULL;
             }
             else
             {
@@ -199,25 +200,25 @@ void Markov_Chain<T>::Add_Event_Sequence(std::vector<T> data)
 }
 
 template <class T>
-void Markov_Chain<T>::Remove_Event(T last_event, T current_event)
+void Markov_Chain<T>::Remove_Event(T last_node, T next_node)
 {
-    if (m_map.count(current_event) && m_map.count(last_event))
+    if (m_map.count(next_node) && m_map.count(last_node))
     {
-        Markov_State<T>* state = &m_map[last_event];
-        Markov_Edge<T>** index = &state->edge_list;
+        Markov_Node<T>* node = &m_map[last_node];
+        Markov_Event<T>** index = &node->event_list;
 
         if ((*index) != NULL)
         {
-            while ((*index)->next_edge != NULL && (*index)->next_state->data != current_event)
+            while ((*index)->next_event != NULL && (*index)->next_node->data != next_node)
             {
-                index = &(*index)->next_edge;
+                index = &(*index)->next_event;
             }
 
             if ((*index) != NULL)
             {
-                state->num_events -= (*index)->event_rate;
-                Markov_Edge<T>* todelete = *index;
-                *index = (*index)->next_edge;
+                node->num_events -= (*index)->event_rate;
+                Markov_Event<T>* todelete = *index;
+                *index = (*index)->next_event;
                 delete todelete;
             }
         }
@@ -225,19 +226,19 @@ void Markov_Chain<T>::Remove_Event(T last_event, T current_event)
 }
 
 template <class T>
-float Markov_Chain<T>::Get_Probability(T A, T B)
+float Markov_Chain<T>::Get_Probability(T last_node, T next_node)
 {
-    Markov_State<T>* state = &m_map[A];
-    Markov_Edge<T>* index = state->edge_list;
+    Markov_Node<T>* node = &m_map[last_node];
+    Markov_Event<T>* index = node->event_list;
 
-    if (m_map.count(A) && m_map.count(B))
+    if (m_map.count(last_node) && m_map.count(next_node))
     {
-        while (index != NULL && index->next_state->data != B)
+        while (index != NULL && index->next_node->data != next_node)
         {
-            index = index->next_edge;
+            index = index->next_event;
         }
 
-        if (index != NULL) return ((float)index->event_rate) / ((float)state->num_events);
+        if (index != NULL) return ((float)index->event_rate) / ((float)node->num_events);
     }
     return 0;
 }
@@ -245,20 +246,20 @@ float Markov_Chain<T>::Get_Probability(T A, T B)
 template <class T>
 void Markov_Chain<T>::Print_To_Console ()
 {
-    Markov_State<T>* state;
-    Markov_Edge<T>* edge;
+    Markov_Node<T>* node;
+    Markov_Event<T>* event;
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        state = &iterator->second;
-        edge = state->edge_list;
-        std::cout<<"\nState: " <<  state->data
-            <<"\nNum Events: " << state->num_events
+        node = &iterator->second;
+        event = node->event_list;
+        std::cout<<"\nState: " <<  node->data
+            <<"\nNum Events: " << node->num_events
             <<"\nNext States: [Frequency / Data]";
 
-        while (edge != NULL)
+        while (event != NULL)
         {
-            std::cout <<"\n\t[" << edge->next_state->data << " / " << edge->event_rate << "]";
-            edge = edge->next_edge;
+            std::cout <<"\n\t[" << event->next_node->data << " / " << event->event_rate << "]";
+            event = event->next_event;
         }
 
         std::cout << "\n";
@@ -266,29 +267,45 @@ void Markov_Chain<T>::Print_To_Console ()
 }
 
 template <class T>
-std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size)
+std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size, T start_node, bool random_start)
 {
     srand (time(NULL));
     std::vector<T> retval;
     int count = 0;
-    int val = rand() % m_map.size();
+    int val;
+    Markov_Node<T> node;
+    Markov_Event<T>* event;
 
-    auto item = m_map.begin();
-    std::advance( item, val );
-    Markov_State<T> state = item->second;
-    Markov_Edge<T>* edge = state.edge_list;
-
-    while (count < output_size && edge != NULL)
+    if (random_start)
     {
-        retval.push_back(state.data);
-        val = rand() % state.num_events;
-        while(val >= 0 && edge->next_edge != NULL)
+        auto item = m_map.begin();
+        val = rand() % m_map.size();
+        std::advance( item, val );
+        node = item->second;
+    }
+    else if (m_map.count(start_node) != 0)
+    {
+        node = m_map[start_node];
+    }
+    else
+    {
+        std::cout << "\nOutput_Random_Sequence : Markov chain does not contain specified start node\n";
+        exit(EXIT_FAILURE);
+    }
+
+    event = node.event_list;
+
+    while (count < output_size && event != NULL)
+    {
+        retval.push_back(node.data);
+        val = rand() % node.num_events;
+        while(val >= 0 && event->next_event != NULL)
         {
-            val -= edge->event_rate;
-            if (val >= 0) edge = edge->next_edge;
+            val -= event->event_rate;
+            if (val >= 0) event = event->next_event;
         }
-        state = *edge->next_state;
-        edge = state.edge_list;
+        node = *event->next_node;
+        event = node.event_list;
         count++;
     }
     return retval;
@@ -297,8 +314,8 @@ std::vector<T> Markov_Chain<T>::Output_Random_Sequence (int output_size)
 template <class T>
 void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
 {
-    Markov_State<T> state;
-    Markov_Edge<T>* edge;
+    Markov_Node<T> node;
+    Markov_Event<T>* event;
     std::ofstream out(filename);
     int probability = 0;
 
@@ -306,21 +323,21 @@ void Markov_Chain<T>::Export_To_Graphviz(std::string filename)
 
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        state = ((Markov_State<T>)iterator->second);
-        out << "\n_" <<  state.data << " [label=\"" << state.data << "\"];";
+        node = ((Markov_Node<T>)iterator->second);
+        out << "\n_" <<  node.data << " [label=\"" << node.data << "\"];";
     }
 
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
-        state = ((Markov_State<T>)iterator->second);
-        edge  = state.edge_list;
-        while (edge != NULL)
+        node = ((Markov_Node<T>)iterator->second);
+        event  = node.event_list;
+        while (event != NULL)
         {
-            probability = (state.num_events == 0) ?
-                0 : (int)(100 * ((float)edge->event_rate) / ((float)state.num_events) );
+            probability = (node.num_events == 0) ?
+                0 : (int)(100 * ((float)event->event_rate) / ((float)node.num_events) );
 
-            out << "\n_" << state.data << " -> _" << edge->next_state->data << " [label=\"" << probability << "\"];";
-            edge = edge->next_edge;
+            out << "\n_" << node.data << " -> _" << event->next_node->data << " [label=\"" << probability << "\"];";
+            event = event->next_event;
         }
     }
 

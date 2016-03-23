@@ -104,7 +104,7 @@ int main (int argc, char* argv[])
 
     chain->Add_File_To_Chain(file);
     chain->Build_Chain();
-    sequence = chain->m_chain.Output_Random_Sequence(out_size);
+    sequence = chain->m_chain.Output_Random_Sequence(out_size, "", true);
     Print_Vector<std::string>(sequence);
     if (print_debug) chain->m_chain.Print_To_Console();
     if (graph != "") chain->m_chain.Export_To_Graphviz(graph);
