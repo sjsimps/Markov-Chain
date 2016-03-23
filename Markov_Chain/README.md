@@ -4,23 +4,23 @@ This document overviews how to use the markov chain data structure
 as contained within
 [markov_chain.h](https://github.com/sjsimps/Markov-Chain/blob/master/Markov_Chain/markov_chain.h)
 
-###Adding Nodes:
+###Adding Nodes and Events:
 
 ```C++
-//Adds a single node without a previous state
-void Add_Node(T current_event);
-```
+//Adds a single node without any events
+void Add_Node(T node);
 
-###Adding Edges:
+//Adds a sequence of events to the chain through a vector of nodes
+void Add_Event_Sequence(std::vector<T> node_sequence);
 
-```C++
-//Adding edges between nodes that do not exist will automatically create the appropriate nodes
+//Adds an event to the chain from last_node to next_node
+//The 'num_events' parameter determines the weight of the event
+void Add_Event(T last_node, T next_node, unsigned int num_events = 1);
 
-//Adds a sequence of events to the chain
-void Add_Event_Sequence(std::vector<T> data);
+//Removes all events between two nodes
+void Remove_Event(T last_event, T current_event);
 
-//Adds event to chain with previous state information
-void Add_Event(T last_event, T current_event, unsigned int num_events = 1);
+//Adding events between nodes that do not exist will automatically create the appropriate nodes
 ```
 
 ###Markov Chain Visualization:
@@ -33,7 +33,7 @@ void Export_To_Graphviz(std::string filename);
 ###Randomized Output:
 
 ```C++
-//Outputs randomized state sequence
+//Outputs randomized node sequence
 std::vector<T> Output_Random_Sequence (int output_length);
 ```
 
