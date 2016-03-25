@@ -238,7 +238,10 @@ float Markov_Chain<T>::Get_Probability(T last_node, T next_node)
             index = index->next_event;
         }
 
-        if (index != NULL) return ((float)index->event_rate) / ((float)node->num_events);
+        if ((index != NULL) && (node->num_events > 0))
+        {
+            return ((float)index->event_rate) / ((float)node->num_events);
+        }
     }
     return 0;
 }
@@ -248,18 +251,24 @@ void Markov_Chain<T>::Print_To_Console ()
 {
     Markov_Node<T>* node;
     Markov_Event<T>* event;
+
+    std::cout<<"\nFormat:\t\t[Node / #Events]\n";
     for(auto iterator = m_map.begin(); iterator != m_map.end(); iterator++)
     {
         node = &iterator->second;
         event = node->event_list;
-        std::cout<<"\nState: " <<  node->data
-            <<"\nNum Events: " << node->num_events
-            <<"\nNext States: [Frequency / Data]";
+        std::cout<<"\nCurrent Node:\t[" <<  node->data << " / " << node->num_events << "]"
+            <<"\nNext Nodes:";
 
-        while (event != NULL)
+        if (event != NULL)
         {
-            std::cout <<"\n\t[" << event->next_node->data << " / " << event->event_rate << "]";
+            std::cout <<"\t[" << event->next_node->data << " / " << event->event_rate << "]";
             event = event->next_event;
+            while (event != NULL)
+            {
+                std::cout <<"\n\t\t[" << event->next_node->data << " / " << event->event_rate << "]";
+                event = event->next_event;
+            }
         }
 
         std::cout << "\n";
