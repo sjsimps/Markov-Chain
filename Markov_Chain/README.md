@@ -69,21 +69,17 @@ Visual Output:
 Console Output:
 
 ```
-State: a
-Num Events: 3
-Next States: [Frequency / Data]
-    [b / 3]
+Format:         [Node / #Events]
 
-State: b
-Num Events: 1
-Next States: [Frequency / Data]
-    [c / 1]
+Current Node:   [a / 3]
+Next Nodes:     [b / 3]
 
-State: c
-Num Events: 3
-Next States: [Frequency / Data]
-    [a / 1]
-    [b / 2]
+Current Node:   [b / 1]
+Next Nodes:     [c / 1]
+
+Current Node:   [c / 3]
+Next Nodes:     [a / 1]
+                [b / 2]
 ```
 
 
