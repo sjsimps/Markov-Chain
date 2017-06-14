@@ -30,14 +30,14 @@ void Remove_Event(T last_event, T current_event);
 void Export_To_Graphviz(std::string filename);
 ```
 
-###Randomized Output:
+### Randomized Output:
 
 ```C++
 //Outputs randomized node sequence
 std::vector<T> Output_Random_Sequence (int output_length, T start_node, bool random_start);
 ```
 
-###Sample Code:
+### Sample Code:
 
 The following code snippet shows how to create and visualize a
 markov chain of type std::string:
