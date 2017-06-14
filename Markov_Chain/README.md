@@ -1,10 +1,10 @@
-#Using the Markov Chain Data Structure:
+# Using the Markov Chain Data Structure:
 
 This document overviews how to use the markov chain data structure
 as contained within
 [markov_chain.h](https://github.com/sjsimps/Markov-Chain/blob/master/Markov_Chain/markov_chain.h)
 
-###Adding Nodes and Events:
+### Adding Nodes and Events:
 
 ```C++
 //Adds a single node without any events
@@ -23,7 +23,7 @@ void Remove_Event(T last_event, T current_event);
 //Adding events between nodes that do not exist will automatically create the appropriate nodes
 ```
 
-###Markov Chain Visualization:
+### Markov Chain Visualization:
 
 ```C++
 //Writes markov chain to [.dot] format for visualization
